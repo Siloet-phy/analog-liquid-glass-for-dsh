@@ -1,0 +1,9 @@
+# dsh-liquid-glass-composer 的 bundle 层：把插件行插进组合。
+#
+# 本插件是纯客户端视觉插件：宿主侧只提供一个空壳 apply()，
+# 真正的玻璃层由 Web 客户端加载 client.js 完成（package.json 的 dsh.client 声明）。
+# 没有依赖、没有构建、没有配置项 —— 装上即为默认开启。
+- insert:
+    - id: liquid-glass-composer
+      name: 'dsh-liquid-glass-composer'
+      config: {}
