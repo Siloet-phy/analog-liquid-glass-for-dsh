@@ -1,0 +1,4 @@
+# 统一换行符，避免 Windows 上 CRLF 污染 diff 与包内容
+* text=auto eol=lf
+*.png binary
+*.ico binary
