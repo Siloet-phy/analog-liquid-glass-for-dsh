@@ -130,6 +130,12 @@ if (dom === undefined) {
 
   const host = document.createElement('div')
   document.body.appendChild(host)
+  // jsdom 里所有元素尺寸都是 0，而插件的锚定逻辑是 fail-closed（尺寸不合理就隐藏）。
+  // 给"原生输入框卡片"喂一个真实矩形，几何逻辑才测得到。
+  const card = document.querySelector('[data-composer-card]')
+  if (card !== null) {
+    card.getBoundingClientRect = () => ({ left: 100, top: 500, width: 780, height: 92, right: 880, bottom: 592, x: 100, y: 500 })
+  }
   const Comp = registrations[0].comp
   try {
     // createRoot + act：effect 会被同步刷出，断言才看得到玻璃层
@@ -146,6 +152,20 @@ if (dom === undefined) {
     for (const cls of ['dsh-lg-frost', 'dsh-lg-glow', 'dsh-lg-rim', 'dsh-lg-spec', 'dsh-lg-inner', 'dsh-lg-bloom']) {
       check(`子层 ${cls} 在 DOM 里`, layer?.querySelector(`.${cls}`) !== null)
     }
+    // 几何锚定：CSS 变量与 data-anchored 都写在 React 渲染的那个 div（.dsh-lg-root）上，
+    // 不是写在测试手建的父容器上 —— 断言必须取对元素。
+    const rootEl = host.querySelector('.dsh-lg-root')
+    check('宿主被标记为已锚定', rootEl?.dataset?.anchored === '1', rootEl?.dataset?.anchored)
+    check('写入卡片宽度 780px', rootEl?.style?.getPropertyValue('--dsh-lg-w') === '780.0px', rootEl?.style?.getPropertyValue('--dsh-lg-w'))
+    check('写入卡片高度 92px', rootEl?.style?.getPropertyValue('--dsh-lg-h') === '92.0px', rootEl?.style?.getPropertyValue('--dsh-lg-h'))
+    check('写入卡片左边距 100px', rootEl?.style?.getPropertyValue('--dsh-lg-x') === '100.0px', rootEl?.style?.getPropertyValue('--dsh-lg-x'))
+    check('写入卡片上边距 500px', rootEl?.style?.getPropertyValue('--dsh-lg-y') === '500.0px', rootEl?.style?.getPropertyValue('--dsh-lg-y'))
+
+    // 卡片消失后必须取消锚定（宁可不显示，也不能横铺满屏）
+    card?.remove()
+    await act(async () => { window.dispatchEvent(new dom.window.Event('resize')) })
+    check('卡片消失后取消锚定（fail-closed）', rootEl?.dataset?.anchored === '0', rootEl?.dataset?.anchored)
+
     // 忙碌状态：running 翻成 true，data-busy / data-on 应跟着变（验证响应式接通）
     await act(async () => {
       root.render(React.createElement(Comp, { useSession: (sel) => sel({ running: true }) }))
