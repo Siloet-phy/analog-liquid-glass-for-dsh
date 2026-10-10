@@ -28,8 +28,18 @@ window.__ModuleLoader__.load({
     const THEME_WINDOW_MS = 1900
 
     const CSS = `
-/* ============ 挂载层：不吃鼠标事件，纯视觉 ============ */
-.dsh-lg{position:absolute;inset:0;pointer-events:none;
+/* ============ 挂载层 ============
+   定位策略：**不要**用 position:absolute 依赖 slot 容器的定位上下文 ——
+   容器若没有 position，绝对定位会一路找到视口，玻璃就横铺满屏。
+   改成 fixed + 实测原生输入框的视口矩形，把 x/y/w/h 写进 CSS 变量：
+   几何是确定的，也不受父级布局影响；找不到卡片就整体隐藏（fail-closed）。 */
+.dsh-lg-root{position:fixed;top:0;left:0;margin:0;padding:0;pointer-events:none;
+  width:0;height:0;visibility:hidden}
+.dsh-lg-root[data-anchored="1"]{visibility:visible}
+
+.dsh-lg{position:absolute;pointer-events:none;
+  left:var(--dsh-lg-x,0px);top:var(--dsh-lg-y,0px);
+  width:var(--dsh-lg-w,0px);height:var(--dsh-lg-h,0px);
   border-radius:var(--dsh-lg-radius,20px);
   /* 深/浅两套色值，跟随 DSH 的 body[data-ds-dark-theme] */
   --dsh-lg-c1:112,176,244;
@@ -133,6 +143,17 @@ html.dsh-lg-theming .dsh-lg-bubbles i{
   .dsh-lg-bubbles i{transform:none}
   html.dsh-lg-theming .dsh-lg,html.dsh-lg-theming .dsh-lg *{transition:none!important}
 }
+
+/* ============ 顺手修 DSH 自己的 / 菜单"看着没底板" ============
+   DSH 把菜单底色画在 MenuSurface 的 .material 上：
+     background: var(--dsw-menu-surface-fill);  backdrop-filter: blur(40px) saturate(150%)
+   Windows 上这两个值是 浅色 #f8f9fa94（≈58% 不透明）/ 深色 #43454a73（≈45% 不透明），
+   也就是"半透明底 + 糊背景" —— 背后要是纯色（浅色主题的白底），就没东西可糊，
+   面板边界直接消失，看着就是"透明"。
+   这里换成 DSH 自己在 macOS 分支用的那组 94% 不透明值，且只作用于 / 唤起的那张菜单。
+   不想要这段，删掉本块即可（不影响玻璃本身）。 */
+[data-trigger-menu]{--dsw-menu-surface-fill:#f8f9faf0}
+body[data-ds-dark-theme] [data-trigger-menu]{--dsw-menu-surface-fill:#303136f0}
 `
 
     /** 挂全局样式；重复挂载时只保留一份。 */
@@ -183,28 +204,67 @@ html.dsh-lg-theming .dsh-lg-bubbles i{
         host.appendChild(node)
         layerRef.current = node
         bubblesRef.current = node.querySelector('.dsh-lg-bubbles')
-
-        // 取原生卡片的圆角，让玻璃严格贴合（只读，不写原生样式）。
-        // 全程防御式：getComputedStyle 在非浏览器环境可能不存在；拿不到就用自己的默认圆角。
-        const card = document.querySelector('[data-composer-card]')
-        const sync = () => {
-          if (card === null || card === undefined) return
-          try {
-            if (typeof getComputedStyle !== 'function') return
-            const radius = getComputedStyle(card).borderTopLeftRadius
-            if (typeof radius === 'string' && radius !== '' && radius !== '0px') {
-              node.style.setProperty('--dsh-lg-radius', radius)
-            }
-          } catch (err) {
-            console.debug('[liquid-glass] 读原生圆角失败，使用默认值：', err)
-          }
-        }
-        sync()
-
         return () => {
           layerRef.current = null
           bubblesRef.current = null
           node.parentNode?.removeChild(node)
+        }
+      }, [])
+
+      // 几何锚定：把玻璃贴合到原生输入框卡片的**视口矩形**上。
+      // 只读原生布局，不写它的样式；找不到卡片就整体隐藏（宁可不显示，也不要铺满屏）。
+      React.useEffect(() => {
+        const host = hostRef.current
+        if (host === null || host === undefined) return undefined
+        let card
+        let observer
+        const sync = () => {
+          try {
+            if (card === undefined || card === null || !card.isConnected) {
+              card = document.querySelector('[data-composer-card]')
+            }
+            if (card === null || card === undefined) {
+              host.dataset.anchored = '0'
+              return
+            }
+            const r = card.getBoundingClientRect()
+            if (r.width < 20 || r.height < 8) {
+              host.dataset.anchored = '0'
+              return
+            }
+            host.style.setProperty('--dsh-lg-x', `${r.left.toFixed(1)}px`)
+            host.style.setProperty('--dsh-lg-y', `${r.top.toFixed(1)}px`)
+            host.style.setProperty('--dsh-lg-w', `${r.width.toFixed(1)}px`)
+            host.style.setProperty('--dsh-lg-h', `${r.height.toFixed(1)}px`)
+            if (typeof getComputedStyle === 'function') {
+              const radius = getComputedStyle(card).borderTopLeftRadius
+              if (typeof radius === 'string' && radius !== '' && radius !== '0px') {
+                host.style.setProperty('--dsh-lg-radius', radius)
+              }
+            }
+            host.dataset.anchored = '1'
+          } catch (err) {
+            console.debug('[liquid-glass] 锚定失败，暂时隐藏：', err)
+            host.dataset.anchored = '0'
+          }
+        }
+        sync()
+        const target = host.parentElement
+        if (typeof ResizeObserver === 'function' && target !== null && target !== undefined) {
+          try {
+            observer = new ResizeObserver(sync)
+            observer.observe(target)
+          } catch { /* 观察不了就算了，还有下面的事件 */ }
+        }
+        window.addEventListener('resize', sync)
+        window.addEventListener('scroll', sync, true)
+        // 首帧后可能才有布局，再对齐一次
+        const raf = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(sync) : 0
+        return () => {
+          if (observer !== undefined) observer.disconnect()
+          window.removeEventListener('resize', sync)
+          window.removeEventListener('scroll', sync, true)
+          if (raf !== 0 && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(raf)
         }
       }, [])
 
@@ -220,7 +280,8 @@ html.dsh-lg-theming .dsh-lg-bubbles i{
       return React.createElement('div', {
         ref: hostRef,
         'aria-hidden': 'true',
-        style: { position: 'relative', width: '100%', height: '100%', pointerEvents: 'none' },
+        'data-anchored': '0',
+        className: 'dsh-lg-root',
       })
     }
 
