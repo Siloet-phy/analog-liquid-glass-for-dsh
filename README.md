@@ -56,13 +56,22 @@ dsh plugin --profile <你的 profile> add github:Siloet-phy/dsh-liquid-glass-com
 ## 开发
 
 ```bash
-node selftest.mjs
+node selftest.mjs                      # 19 项：替身环境，验证模块面与 apply() 行为
+node livetest.mjs <react-umd 目录>      # 20 项：真 React + 真 DOM，验证真的能渲染
 ```
 
-用替身把客户端 bundle 完整跑一遍：语法、模块面（`name`/`inject`/`apply`）、
-`apply()` 在有无服务时的行为、slot 注册目标、样式挂载、`theme/change` 订阅、
-组件渲染——共 19 项断言。**改完 client.js 先跑它**，
-因为客户端 bundle 一旦在最顶层抛错会牵连 Web 端模块系统。
+- **`selftest.mjs`**：用替身把客户端 bundle 完整跑一遍——语法、模块面（`name`/`inject`/`apply`）、
+  `apply()` 在有无服务时的行为、slot 注册目标、样式挂载、`theme/change` 订阅、组件渲染。
+  **改完 `client.js` 先跑它**，因为客户端 bundle 一旦在最顶层抛错会牵连 Web 端模块系统。
+- **`livetest.mjs`**：需要 `react`/`react-dom`/`jsdom`（**故意不进 package.json 依赖**，
+  避免让插件包带上开发期重量）。它用**真 React**把玻璃层真的挂进真 DOM，并验证
+  `running` 状态翻转时 `data-busy` / `data-on` 跟着变、卸载后 DOM 清干净。
+
+> 两个测试装置上的坑（都写进注释了）：
+> ① `document`/`window` 必须在 `require('react-dom')` **之前**就位；
+> ② 必须用 `createRoot` + `act()`，**不能用 legacy `ReactDOM.render`**——
+>    legacy render 会把 passive effects 推到下一个任务，同步断言时会看到
+>    "玻璃层没进 DOM"这种**假失败**。
 
 ## 技术笔记
 

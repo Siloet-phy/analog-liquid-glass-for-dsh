@@ -1,0 +1,21 @@
+fix: 圆角读取加防御 + 补真环境测试（逐条实测排雷）
+
+排雷结论（每一条都用实测验证，不是读代码猜的）：
+
+- 客户端 bundle 的路径由 package.json 的 exports["./client"] 决定。
+  起临时 web 载体抓 index 启动图，我的行是 <pkg>/client.js，
+  不是官方 README 里说的 lib/client.js —— 那只是官方包构建产物的约定。
+- 服务端不改写 bundle：取回的响应体与本地 client.js 逐字节一致
+  （仅追加 sourceMappingURL 尾注与分号）。
+- 只有组合 URL 能取到 bundle：/plugins/??<pkg>/client.js&rev=<rev>；
+  单资源路径一律 404，连官方包也一样。
+- require('react') 的键名就是裸包名 react（基座表用裸包名做键）。
+
+修 bug：读原生卡片圆角时直接调用 getComputedStyle。浏览器里没问题，
+但该全局不存在时会抛错并中断整个挂载；现改为 try/catch + 类型判断，
+拿不到就用默认圆角。同时把「忙碌状态」从 querySelector 查询改为直接持有引用，
+避免查询落空导致静默失效。
+
+新增 livetest.mjs：真 React + 真 DOM（createRoot + act）跑 20 项断言，
+验证玻璃层真的进 DOM、running 翻转时 data-busy/data-on 跟着变、卸载后清干净。
+react/react-dom/jsdom 故意不进 package.json 依赖，避免插件包带上开发期重量。

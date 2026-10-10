@@ -39,6 +39,7 @@
     "index.js",
     "client.js",
     "selftest.mjs",
+    "livetest.mjs",
     "cordis.patch.yml",
     "locale",
     "icon.svg",

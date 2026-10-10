@@ -155,6 +155,9 @@ html.dsh-lg-theming .dsh-lg-bubbles i{
      */
     function GlassLayer(props) {
       const hostRef = React.useRef(null)
+      // 直接持有 DOM 引用，避免每次状态变化都去查询；也让"忙碌状态"不会因查询落空而静默失效
+      const layerRef = React.useRef(null)
+      const bubblesRef = React.useRef(null)
 
       // 响应式来源：模型是否在跑（Host 的会话运行状态投影）
       const running = typeof props.useSession === 'function'
@@ -164,7 +167,7 @@ html.dsh-lg-theming .dsh-lg-bubbles i{
       // 建一次 DOM（这一层不参与 React 重渲染）
       React.useEffect(() => {
         const host = hostRef.current
-        if (host === null) return undefined
+        if (host === null || host === undefined) return undefined
         const node = document.createElement('div')
         node.className = 'dsh-lg'
         node.setAttribute('aria-hidden', 'true')
@@ -178,27 +181,40 @@ html.dsh-lg-theming .dsh-lg-bubbles i{
           '<div class="dsh-lg-bubbles"><i></i><i></i><i></i></div>',
         ].join('')
         host.appendChild(node)
+        layerRef.current = node
+        bubblesRef.current = node.querySelector('.dsh-lg-bubbles')
 
-        // 取原生卡片的圆角与尺寸，让玻璃严格贴合（只读，不写原生样式）
+        // 取原生卡片的圆角，让玻璃严格贴合（只读，不写原生样式）。
+        // 全程防御式：getComputedStyle 在非浏览器环境可能不存在；拿不到就用自己的默认圆角。
         const card = document.querySelector('[data-composer-card]')
         const sync = () => {
-          if (card === null) return
-          const radius = getComputedStyle(card).borderTopLeftRadius
-          if (radius !== '' && radius !== '0px') node.style.setProperty('--dsh-lg-radius', radius)
+          if (card === null || card === undefined) return
+          try {
+            if (typeof getComputedStyle !== 'function') return
+            const radius = getComputedStyle(card).borderTopLeftRadius
+            if (typeof radius === 'string' && radius !== '' && radius !== '0px') {
+              node.style.setProperty('--dsh-lg-radius', radius)
+            }
+          } catch (err) {
+            console.debug('[liquid-glass] 读原生圆角失败，使用默认值：', err)
+          }
         }
         sync()
 
         return () => {
+          layerRef.current = null
+          bubblesRef.current = null
           node.parentNode?.removeChild(node)
         }
       }, [])
 
-      // 忙碌状态：只在属性上翻一次，避免整层重渲染
+      // 忙碌状态：只改两个属性，不触发整层重渲染
       React.useEffect(() => {
-        const node = hostRef.current?.querySelector('.dsh-lg')
+        const node = layerRef.current
         if (node === null || node === undefined) return
         node.dataset.busy = running ? '1' : '0'
-        node.querySelector('.dsh-lg-bubbles').dataset.on = running ? '1' : '0'
+        const bubbles = bubblesRef.current
+        if (bubbles !== null && bubbles !== undefined) bubbles.dataset.on = running ? '1' : '0'
       }, [running])
 
       return React.createElement('div', {
