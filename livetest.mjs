@@ -149,9 +149,21 @@ if (dom === undefined) {
     check('非忙碌时 data-on=0', layer?.querySelector('.dsh-lg-bubbles')?.dataset?.on === '0')
     check('整层对读屏隐藏 aria-hidden', layer?.getAttribute('aria-hidden') === 'true')
     check('样式表注入 head', document.getElementById('dsh-liquid-glass-composer') !== null)
-    for (const cls of ['dsh-lg-frost', 'dsh-lg-glow', 'dsh-lg-rim', 'dsh-lg-spec', 'dsh-lg-inner', 'dsh-lg-bloom']) {
+    for (const cls of ['dsh-lg-frost', 'dsh-lg-glow', 'dsh-lg-spec', 'dsh-lg-inner', 'dsh-lg-bloom']) {
       check(`子层 ${cls} 在 DOM 里`, layer?.querySelector(`.${cls}`) !== null)
     }
+    // 回归护栏（都是用户点过名的事）：
+    //  · 镶边层 rim 已删——它用「放大盒子 + mask」实现，深色下会变成一圈巨大的旋转发光矩形
+    //  · 泡泡必须是「同一个出生点 + 靠上升距离摊开」，不能再回到逐颗 bottom 偏移的老写法
+    const sheet = document.getElementById('dsh-liquid-glass-composer')?.textContent ?? ''
+    // ⚠ 断言前必须先剥掉 CSS 注释：client.js 的注释里保留了 rim 的示例代码（解释为什么删它），
+    //   裸查子串会被注释里的示例误伤，护栏就变成假失败。
+    const live = sheet.replaceAll(/\/\*[\s\S]*?\*\//g, '')
+    // 按「规则」判定，不按「字串」
+    const ruleOf = (cls) => new RegExp(`\\.${cls}\\s*\\{[^}]*\\}`).test(live)
+    check('样式表里不再有 rim 层（剥注释后按规则判定）', !ruleOf('dsh-lg-rim'))
+    check('泡泡用上升距离变量摊开', /--dsh-lg-bub-rise:/.test(live))
+    check('泡泡不再逐颗偏移 bottom', !/nth-child\(2\)\{[^}]*bottom:/.test(live))
     // 几何锚定：CSS 变量与 data-anchored 都写在 React 渲染的那个 div（.dsh-lg-root）上，
     // 不是写在测试手建的父容器上 —— 断言必须取对元素。
     const rootEl = host.querySelector('.dsh-lg-root')
@@ -160,6 +172,17 @@ if (dom === undefined) {
     check('写入卡片高度 92px', rootEl?.style?.getPropertyValue('--dsh-lg-h') === '92.0px', rootEl?.style?.getPropertyValue('--dsh-lg-h'))
     check('写入卡片左边距 100px', rootEl?.style?.getPropertyValue('--dsh-lg-x') === '100.0px', rootEl?.style?.getPropertyValue('--dsh-lg-x'))
     check('写入卡片上边距 500px', rootEl?.style?.getPropertyValue('--dsh-lg-y') === '500.0px', rootEl?.style?.getPropertyValue('--dsh-lg-y'))
+
+    // ⚠ 包含块不是视口时的对齐（用户报过「根本没有对齐对话框」）：
+    // 给卡片加 backdrop-filter 后，宿主 .dsh-lg-root（position:fixed）的包含块会从视口变成卡片，
+    // 若还按视口坐标写偏移就会叠加两次。插件现在取「卡片矩形 − 宿主矩形」的差值，
+    // 这里把宿主自己的矩形挪到跟卡片同一个原点，断言偏移必须是 0。
+    if (rootEl !== null) {
+      rootEl.getBoundingClientRect = () => ({ left: 100, top: 500, width: 0, height: 0, right: 100, bottom: 500, x: 100, y: 500 })
+      await act(async () => { window.dispatchEvent(new dom.window.Event('resize')) })
+      check('包含块非视口时按差值归零（x）', rootEl.style.getPropertyValue('--dsh-lg-x') === '0.0px', rootEl.style.getPropertyValue('--dsh-lg-x'))
+      check('包含块非视口时按差值归零（y）', rootEl.style.getPropertyValue('--dsh-lg-y') === '0.0px', rootEl.style.getPropertyValue('--dsh-lg-y'))
+    }
 
     // 卡片消失后必须取消锚定（宁可不显示，也不能横铺满屏）
     card?.remove()
