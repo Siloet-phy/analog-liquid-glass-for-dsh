@@ -5,6 +5,8 @@
 顶部镜面高光、内缘白线、边缘缓慢绕行的镶边光；模型思考时玻璃里往上冒泡；
 深浅主题切换带 1.7 秒的从容过渡。
 
+[![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/Siloet-phy/dsh-liquid-glass-composer)
+
 ![浅色](docs/light.png)
 ![深色](docs/dark.png)
 
