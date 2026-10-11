@@ -84,7 +84,7 @@ try {
 }
 
 check('调用了 __ModuleLoader__.load', loaded !== null)
-check('bundle id 正确', loaded?.id === 'dsh-liquid-glass-composer', loaded?.id)
+check('bundle id 正确（与包名一致）', loaded?.id === 'analog-liquid-glass-for-dsh', loaded?.id)
 check('factory 是函数', typeof loaded?.factory === 'function')
 
 const moduleFace = loaded.factory((name) => {
@@ -92,7 +92,7 @@ const moduleFace = loaded.factory((name) => {
   throw new Error(`unexpected require(${name})`)
 })
 
-check('导出 name', moduleFace.name === 'liquid-glass-composer', moduleFace.name)
+check('导出 name', moduleFace.name === 'analog-liquid-glass-for-dsh', moduleFace.name)
 check('导出 inject', Array.isArray(moduleFace.inject) && moduleFace.inject.includes('slots'), JSON.stringify(moduleFace.inject))
 check('导出 apply', typeof moduleFace.apply === 'function')
 check('导出 GlassLayer 组件', typeof moduleFace.GlassLayer === 'function')
@@ -133,7 +133,7 @@ try {
 
 check('注入到 conversation.input.overlay', injected.includes('conversation.input.overlay'), JSON.stringify(injected))
 const reg = registrations[0]
-check('注册 id 为 liquid-glass', reg?.meta?.id === 'liquid-glass', reg?.meta?.id)
+check('注册 id 为 liquid-glass', reg?.meta?.id === 'analog-liquid-glass', reg?.meta?.id)
 check('注册到正确的 slot 名', reg?.meta?.name === 'conversation.input.overlay', reg?.meta?.name)
 check('组件是函数（slot 条目）', typeof reg?.comp === 'function')
 check('挂过样式表', effects.length > 0)

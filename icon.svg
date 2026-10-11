@@ -1,41 +1,74 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="液态玻璃输入框">
-  <title>Liquid Glass Composer</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="algTitle">
+  <title id="algTitle">Analog Liquid Glass — a glass sight tube with a liquid column</title>
+  <!--
+    Analog Liquid Glass
+    ───────────────────
+    立意：把"液态玻璃"做成**模拟仪表**的样子 —— 一根竖直玻璃观液管（sight tube），
+    里面一柱淡蓝液体，顶端一道弯液面（meniscus，液体贴着管壁微微上翘的那道弧），
+    液柱里两点气泡正在上升。对应插件本体：玻璃是容器、液体高度=进度、气泡=模型在思考。
+
+    为什么这样画：
+      · 竖管 + 弯月面是"模拟时代"最一眼可辨的两个符号，和"数字进度条"划清界线；
+      · 管子的高光/内缘白线正好复用插件里的玻璃语言（顶部镜面 + 上缘发丝白线）；
+      · 气泡呼应运行时的"往上冒泡"，静态图标里也能看出它在动。
+
+    配色与插件一致：天蓝 112,176,244（#70b0f4）为主，冷白 #f5f6f8 为釉。
+    小尺寸（16px）下的取舍：弯月面与气泡都 ≥2px，缩放后不糊；没有细碎装饰。
+  -->
   <defs>
-    <!-- 玻璃的冷调底：真正的液态玻璃近乎无色，只有极淡的环境色 -->
-    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.30"/>
-      <stop offset="0.62" stop-color="#ffffff" stop-opacity="0.08"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0.14"/>
+    <!-- 玻璃管体：左亮右暗的柱状高光，做出圆柱体积 -->
+    <linearGradient id="tube" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.34"/>
+      <stop offset="0.28" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="0.72" stop-color="#ffffff" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.22"/>
+    </linearGradient>
+    <!-- 液体：上浅下深，底部更沉 -->
+    <linearGradient id="liquid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a8d0f8"/>
+      <stop offset="1" stop-color="#5f9ee6"/>
+    </linearGradient>
+    <!-- 弯液面：沿管壁上翘的那道弧用更亮的蓝 -->
+    <linearGradient id="meniscus" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#dcecff"/>
+      <stop offset="0.5" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dcecff"/>
     </linearGradient>
     <!-- 顶部镜面高光 -->
-    <radialGradient id="spec" cx="50%" cy="-8%" r="60%">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-    </radialGradient>
-    <!-- 边缘的镶边光（天蓝，只出现在边上） -->
-    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
-      <stop offset="0.5" stop-color="#9ec9fa" stop-opacity="0.55"/>
-      <stop offset="1" stop-color="#6f9fe0" stop-opacity="0.85"/>
+    <linearGradient id="specTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.1"/>
     </linearGradient>
     <linearGradient id="bub" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="0.5" stop-color="#a8d0f8"/>
-      <stop offset="1" stop-color="#7caef0"/>
+      <stop offset="1" stop-color="#cfe6ff"/>
     </linearGradient>
   </defs>
 
-  <!-- 外扩散泛光 -->
-  <rect x="4" y="16" width="56" height="32" rx="14" fill="#8fbaf0" opacity="0.22"/>
+  <!-- 管子外面的一圈极淡环境晕（玻璃压住背景的感觉） -->
+  <rect x="23" y="7" width="18" height="51" rx="9" fill="#70b0f4" opacity="0.14"/>
 
-  <!-- 玻璃本体 -->
-  <rect x="7" y="19" width="50" height="26" rx="12" fill="url(#glass)" stroke="url(#rim)" stroke-width="1.2"/>
-  <rect x="7" y="19" width="50" height="26" rx="12" fill="url(#spec)"/>
-  <!-- 内缘白线（上缘一道发丝光） -->
-  <path d="M19 20.2 H45" stroke="#ffffff" stroke-opacity="0.9" stroke-width="1.4" stroke-linecap="round"/>
+  <!-- 液柱：从管底往上约 55% —— 不填满，"正在读一个水位"才是模拟表的味道 -->
+  <path d="M25 34 q3.5 -3.2 7 0 q3.5 3.2 7 0 L39 50 a3 3 0 0 1 -3 3 h-8 a3 3 0 0 1 -3 -3 Z"
+        fill="url(#liquid)"/>
+  <!-- 弯液面：贴着管壁微微上翘的那道亮弧（液体表面张力） -->
+  <path d="M25 34 q3.5 -3.2 7 0 q3.5 3.2 7 0" fill="none"
+        stroke="url(#meniscus)" stroke-width="2.4" stroke-linecap="round"/>
 
-  <!-- 三点泡泡：一个破灭、一个新生 -->
-  <circle cx="20" cy="35.5" r="2.6" fill="url(#bub)" opacity="0.95"/>
-  <circle cx="28" cy="30.5" r="2.1" fill="url(#bub)" opacity="0.7"/>
-  <circle cx="35" cy="26.5" r="1.6" fill="url(#bub)" opacity="0.45"/>
+  <!-- 液柱里的两点气泡，一近一远（近的在下面刚开始升，远的快升到液面） -->
+  <circle cx="30.5" cy="45" r="2.4" fill="url(#bub)" opacity="0.95"/>
+  <circle cx="34" cy="39" r="1.5" fill="url(#bub)" opacity="0.75"/>
+
+  <!-- 玻璃管：内部釉白 + 边缘发丝线（复用插件里的玻璃语言） -->
+  <rect x="24.6" y="8.6" width="14.8" height="46.8" rx="7.4"
+        fill="url(#tube)" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2"/>
+
+  <!-- 顶部镜面高光：一道斜向的亮面，玻璃最容易辨认的信号 -->
+  <path d="M27 12 q4 -2.4 8 0 q-3 1.6 -8 0 Z" fill="url(#specTop)"/>
+  <!-- 上缘内白线（发丝级） -->
+  <path d="M28.6 9.4 H35.4" stroke="#ffffff" stroke-opacity="0.95" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- 管口与管底的两道箍（模拟仪表常见的金属/玻璃环，也帮小尺寸定形） -->
+  <path d="M25.4 12 H38.6" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1" stroke-linecap="round"/>
+  <path d="M26.4 53 H37.6" stroke="#ffffff" stroke-opacity="0.30" stroke-width="1" stroke-linecap="round"/>
 </svg>

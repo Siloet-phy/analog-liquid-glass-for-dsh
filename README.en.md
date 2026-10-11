@@ -1,4 +1,4 @@
-# dsh-liquid-glass-composer
+# analog-liquid-glass-for-dsh
 
 > **Turn the DeepSeek Harness composer into a sheet of liquid glass.**
 
@@ -11,13 +11,13 @@ Bubbles rise inside the glass while the model thinks. Light/dark switching eases
 ## Install
 
 ```bash
-dsh plugin --profile <your-profile> add dsh-liquid-glass-composer
+dsh plugin --profile <your-profile> add analog-liquid-glass-for-dsh
 ```
 
 From GitHub:
 
 ```bash
-dsh plugin --profile <your-profile> add github:Siloet-phy/dsh-liquid-glass-composer
+dsh plugin --profile <your-profile> add github:Siloet-phy/analog-liquid-glass-for-dsh
 ```
 
 > The desktop build requires DSH to be **fully closed** while its package manager runs;
@@ -69,7 +69,7 @@ down the web module system.
 ## Uninstall
 
 ```bash
-dsh plugin --profile <your-profile> remove dsh-liquid-glass-composer
+dsh plugin --profile <your-profile> remove analog-liquid-glass-for-dsh
 ```
 
 The composer returns to its original appearance; no styles are left behind.

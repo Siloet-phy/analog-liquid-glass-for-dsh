@@ -1,30 +1,30 @@
 {
-  "name": "dsh-liquid-glass-composer",
+  "name": "analog-liquid-glass-for-dsh",
   "version": "0.1.0",
-  "description": "把 DeepSeek Harness 的输入框变成一片液态玻璃：顶部镜面高光、内缘白线、边缘缓慢绕行的镶边光，模型思考时玻璃里往上冒泡，深浅主题切换带 1.7 秒从容过渡。",
+  "description": "Analog Liquid Glass for DeepSeek Harness —— 把 DSH 的输入框变成一片模拟质感的液态玻璃：顶部镜面高光、内缘白线、边缘缓慢绕行的光晕，模型思考时玻璃里往上冒泡，深浅主题切换带 1.7 秒从容过渡。",
   "keywords": [
     "dsh-plugin",
     "deepseek-harness",
     "deepseek",
     "dsh",
     "liquid-glass",
+    "analog",
     "glass",
     "composer",
     "input",
     "ui",
     "theme",
-    "apple-style",
     "bubble"
   ],
   "license": "MIT",
   "author": "Siloet-phy",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Siloet-phy/dsh-liquid-glass-composer.git"
+    "url": "git+https://github.com/Siloet-phy/analog-liquid-glass-for-dsh.git"
   },
-  "homepage": "https://github.com/Siloet-phy/dsh-liquid-glass-composer#readme",
+  "homepage": "https://github.com/Siloet-phy/analog-liquid-glass-for-dsh#readme",
   "bugs": {
-    "url": "https://github.com/Siloet-phy/dsh-liquid-glass-composer/issues"
+    "url": "https://github.com/Siloet-phy/analog-liquid-glass-for-dsh/issues"
   },
   "type": "module",
   "main": "index.js",

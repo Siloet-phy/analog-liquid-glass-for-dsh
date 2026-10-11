@@ -148,14 +148,14 @@ if (dom === undefined) {
     check('泡泡三颗在 DOM 里', layer?.querySelectorAll('.dsh-lg-bubbles i').length === 3)
     check('非忙碌时 data-on=0', layer?.querySelector('.dsh-lg-bubbles')?.dataset?.on === '0')
     check('整层对读屏隐藏 aria-hidden', layer?.getAttribute('aria-hidden') === 'true')
-    check('样式表注入 head', document.getElementById('dsh-liquid-glass-composer') !== null)
+    check('样式表注入 head', document.getElementById('analog-liquid-glass-for-dsh') !== null)
     for (const cls of ['dsh-lg-frost', 'dsh-lg-glow', 'dsh-lg-spec', 'dsh-lg-inner', 'dsh-lg-bloom']) {
       check(`子层 ${cls} 在 DOM 里`, layer?.querySelector(`.${cls}`) !== null)
     }
     // 回归护栏（都是用户点过名的事）：
     //  · 镶边层 rim 已删——它用「放大盒子 + mask」实现，深色下会变成一圈巨大的旋转发光矩形
     //  · 泡泡必须是「同一个出生点 + 靠上升距离摊开」，不能再回到逐颗 bottom 偏移的老写法
-    const sheet = document.getElementById('dsh-liquid-glass-composer')?.textContent ?? ''
+    const sheet = document.getElementById('analog-liquid-glass-for-dsh')?.textContent ?? ''
     // ⚠ 断言前必须先剥掉 CSS 注释：client.js 的注释里保留了 rim 的示例代码（解释为什么删它），
     //   裸查子串会被注释里的示例误伤，护栏就变成假失败。
     const live = sheet.replaceAll(/\/\*[\s\S]*?\*\//g, '')

@@ -1,11 +1,11 @@
-# dsh-liquid-glass-composer
+# Analog Liquid Glass for DeepSeek Harness
 
-> **把 DeepSeek Harness 的输入框变成一片液态玻璃。**
+> **把 DeepSeek Harness 的输入框变成一片模拟质感的液态玻璃。**
 
 顶部镜面高光、内缘白线、边缘缓慢绕行的镶边光；模型思考时玻璃里往上冒泡；
 深浅主题切换带 1.7 秒的从容过渡。
 
-[![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/Siloet-phy/dsh-liquid-glass-composer)
+[![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/Siloet-phy/analog-liquid-glass-for-dsh)
 
 ![浅色](docs/light.png)
 ![深色](docs/dark.png)
@@ -13,13 +13,13 @@
 ## 安装
 
 ```bash
-dsh plugin --profile <你的 profile> add dsh-liquid-glass-composer
+dsh plugin --profile <你的 profile> add analog-liquid-glass-for-dsh
 ```
 
 从 GitHub 装：
 
 ```bash
-dsh plugin --profile <你的 profile> add github:Siloet-phy/dsh-liquid-glass-composer
+dsh plugin --profile <你的 profile> add github:Siloet-phy/analog-liquid-glass-for-dsh
 ```
 
 > 桌面版 DSH 的包管理需要**先完全退出 DSH** 再执行；装完重启生效。
@@ -43,9 +43,24 @@ dsh plugin --profile <你的 profile> add github:Siloet-phy/dsh-liquid-glass-com
    真正的液态玻璃几乎是"无色"的——透白玻璃 + 染白的雾 + 白边色散。
    颜色只允许出现在**边缘的高光**上。任何"玻璃内部有一团彩色在流动"的做法，
    看着都会像彩色塑料。（我做出过六版彩色玻璃，全被否了。）
-2. **不改 DSH 原生输入框的任何样式与结构。**
-   本插件只往 slot 里**加一层**，靠 CSS 变量贴合尺寸。
-   所以原生主题、字号、布局更新都不会和它打架；卸载后原样恢复。
+2. **玻璃层只往 slot 里"加层"**，靠测量原生卡片的矩形贴合尺寸，不改它的 DOM 结构。
+   唯一例外是"真毛玻璃"：为做出磨砂感，会覆盖 `[data-composer-card]` 的背景与
+   `backdrop-filter`（这是毛玻璃唯一能成立的物理位置——在卡片内容之上加雾会把文字压淡，
+   对它做 `backdrop-filter` 会把文字一起糊掉）。该段集中在 `client.js` 一处、带注释与旋钮，
+   删掉即回到纯加层模式；`/` 菜单底板那处小修复同理可删。卸载后不留任何样式。
+
+## 图标
+
+`icon.svg` 的立意是**模拟仪表**，和"数字进度条"划清界线：
+
+一根竖直的**玻璃观液管**（sight tube），里面一柱淡蓝液体，顶端一道**弯液面**
+（液体贴管壁上翘的那道弧，是"模拟时代"最一眼可辨的符号），液柱里两点气泡正在上升。
+—— 玻璃是容器、液位是进度、气泡是"模型正在思考"，正好对应插件的三件事。
+
+配色与插件本体一致（天蓝 `112,176,244` 为主、冷白为釉）。
+多尺寸与深浅底的对照见 [`docs/icon-preview.html`](docs/icon-preview.html)；
+设计草图留在 [`docs/icon-concept.svg`](docs/icon-concept.svg)，
+上一版图标备份在 [`docs/icon-previous.svg`](docs/icon-previous.svg)。
 
 ## 兼容性
 
@@ -100,7 +115,7 @@ node livetest.mjs <react-umd 目录>      # 20 项：真 React + 真 DOM，验�
 ## 卸载
 
 ```bash
-dsh plugin --profile <你的 profile> remove dsh-liquid-glass-composer
+dsh plugin --profile <你的 profile> remove analog-liquid-glass-for-dsh
 ```
 
 卸载后输入框恢复原样，不会残留样式（样式表随插件生命周期移除）。

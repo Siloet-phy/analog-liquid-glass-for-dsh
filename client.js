@@ -1,5 +1,5 @@
 /**
- * dsh-liquid-glass-composer —— 给 DSH Web 输入框铺一层"液态玻璃"
+ * analog-liquid-glass-for-dsh —— 给 DSH Web 输入框铺一层"液态玻璃"
  *
  * 形状：输入框是玻璃；模型思考时，玻璃里往上冒泡。
  *
@@ -19,7 +19,9 @@
  * 与 dsh-expression / dsh-ssh 同款。
  */
 window.__ModuleLoader__.load({
-  id: 'dsh-liquid-glass-composer',
+  /* bundle id 与包名一致：client-modules 用包名做浏览器侧的模块身份，
+     这里跟 package.json 的 name 对齐，避免排查时对不上号。 */
+  id: 'analog-liquid-glass-for-dsh',
   factory: (require) => {
     const module = { exports: {} }
     const exports = module.exports
@@ -27,7 +29,7 @@ window.__ModuleLoader__.load({
 
     const React = require('react')
 
-    const STYLE_ID = 'dsh-liquid-glass-composer'
+    const STYLE_ID = 'analog-liquid-glass-for-dsh'
     /** 主题过渡窗口：玻璃 1.7s，留 200ms 余量。 */
     const THEME_WINDOW_MS = 1900
 
@@ -338,7 +340,7 @@ body[data-ds-dark-theme] [data-trigger-menu]{--dsw-menu-surface-fill:#303136f0}
             }
             host.dataset.anchored = '1'
           } catch (err) {
-            console.debug('[liquid-glass] 锚定失败，暂时隐藏：', err)
+            console.debug('[analog-liquid-glass] 锚定失败，暂时隐藏：', err)
             host.dataset.anchored = '0'
           }
         }
@@ -379,7 +381,7 @@ body[data-ds-dark-theme] [data-trigger-menu]{--dsw-menu-surface-fill:#303136f0}
       })
     }
 
-    exports.name = 'liquid-glass-composer'
+    exports.name = 'analog-liquid-glass-for-dsh'
     exports.inject = ['slots', 'theme']
     exports.GlassLayer = GlassLayer
 
@@ -387,10 +389,10 @@ body[data-ds-dark-theme] [data-trigger-menu]{--dsw-menu-surface-fill:#303136f0}
       const slots = ctx.get('slots')
       if (slots === undefined) return
 
-      ctx.effect(ensureStyle, 'liquid-glass: stylesheet')
+      ctx.effect(ensureStyle, 'analog-liquid-glass: stylesheet')
 
       slots.inject('conversation.input.overlay', () => slots.register(
-        { name: 'conversation.input.overlay', id: 'liquid-glass', order: 20, label: '液态玻璃' },
+        { name: 'conversation.input.overlay', id: 'analog-liquid-glass', order: 20, label: 'Analog Liquid Glass' },
         (props) => React.createElement(GlassLayer, props),
       ))
 
@@ -410,7 +412,7 @@ body[data-ds-dark-theme] [data-trigger-menu]{--dsw-menu-surface-fill:#303136f0}
             document.documentElement.classList.remove('dsh-lg-theming')
             if (typeof off === 'function') off()
           }
-        }, 'liquid-glass: theme transition window')
+        }, 'analog-liquid-glass: theme transition window')
       }
     }
 
