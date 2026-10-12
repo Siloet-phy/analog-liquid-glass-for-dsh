@@ -2,8 +2,11 @@
 
 > **把 DeepSeek Harness 的输入框变成一片模拟质感的液态玻璃。**
 
-顶部镜面高光、内缘白线、边缘缓慢绕行的镶边光；模型思考时玻璃里往上冒泡；
+顶部镜面高光、内缘白线、边缘溢出的一圈柔光；模型思考时玻璃里往上冒泡；
 深浅主题切换带 1.7 秒的从容过渡。
+
+名字里的 **Analog** 指**模拟仪表那种质感**（弯液面、观液管、刻度），不是技术上的"模拟/数字"
+—— 对应插件里的玻璃容器、液位式进度与上升的气泡，也与"数字进度条"划清界线。图标即为此意。
 
 [![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/Siloet-phy/analog-liquid-glass-for-dsh)
 
@@ -12,11 +15,7 @@
 
 ## 安装
 
-```bash
-dsh plugin --profile <你的 profile> add analog-liquid-glass-for-dsh
-```
-
-从 GitHub 装：
+从 GitHub 安装（**当前推荐**，本包尚未发布到 npm）：
 
 ```bash
 dsh plugin --profile <你的 profile> add github:Siloet-phy/analog-liquid-glass-for-dsh
@@ -25,17 +24,23 @@ dsh plugin --profile <你的 profile> add github:Siloet-phy/analog-liquid-glass-
 > 桌面版 DSH 的包管理需要**先完全退出 DSH** 再执行；装完重启生效。
 > profile 名一般是 `desktop`（桌面版）或 `web`（`dsh web` 起的服务）。
 
+如果只想用短名（需要在 npm 上已发布同名包）：
+
+```bash
+dsh plugin --profile <你的 profile> add analog-liquid-glass-for-dsh
+```
+
 ## 它做了什么
 
 | 元素 | 说明 |
 |---|---|
-| **磨砂玻璃** | 白雾 + 重度模糊，是"玻璃感"的来源（不是简单叠一层半透明） |
+| **磨砂层** | 白雾 + 重度模糊，是"玻璃感"的来源（不是简单叠一层半透明） |
 | **顶部镜面高光** | 玻璃最容易辨认的那道柔光 |
-| **内缘白线** | 上缘一道发丝白线 —— Apple 液态玻璃最标志性的一笔 |
-| **边缘镶边光** | 1.5px 的渐变亮边沿边框**缓慢绕行**（150 秒一圈），几乎察觉不到在动，但停下来就会觉得少了什么 |
+| **内缘白线** | 上缘一道发丝白线 |
 | **外扩散泛光** | 光从玻璃边缘微微溢到外面一圈 |
-| **三点吐泡泡** | **只在模型思考时出现**：三颗泡错开 1/3 周期，一个破灭、一个新生 |
+| **三点吐泡泡** | **只在模型思考时出现**：三颗泡错开 1/3 周期、同一个出生点，一个破灭、一个新生 |
 | **主题过渡** | 浅 ↔ 深切换时，玻璃比整页更慢地插值（1.7s vs 0.9s） |
+| **真毛玻璃** | 为做出磨砂感，覆盖原生卡片的背景与 `backdrop-filter`（见下方"设计决定"第 2 条） |
 
 ## 两个我坚持的设计决定
 
@@ -67,21 +72,22 @@ dsh plugin --profile <你的 profile> add github:Siloet-phy/analog-liquid-glass-
 - **DSH**：`0.2.0-rc.2` 及以上（依赖 `conversation.input.overlay` slot 与
   `ctx.theme` 的 `theme/change` 事件）。
 - **平台**：Web 客户端（桌面版内置浏览器 / `dsh web`）。纯 CLI 会话不受影响。
-- **浏览器**：Chromium 系（Electron）。`mask-composite` 与 `backdrop-filter` 需要现代内核。
+- **浏览器**：Chromium 系（Electron）。用到 `backdrop-filter` 与 `color-mix()`，需要现代内核。
 - **无障碍**：遵循 `prefers-reduced-motion`——开启后所有动画停止，只保留静态玻璃与状态色。
 
 ## 开发
 
 ```bash
-node selftest.mjs                      # 19 项：替身环境，验证模块面与 apply() 行为
-node livetest.mjs <react-umd 目录>      # 20 项：真 React + 真 DOM，验证真的能渲染
+node selftest.mjs                      # 19 项断言：替身环境，验证模块面与 apply() 行为
+node livetest.mjs [react-umd 目录]      # 30 项断言：真 React + 真 DOM，验证真的能渲染
 ```
 
 - **`selftest.mjs`**：用替身把客户端 bundle 完整跑一遍——语法、模块面（`name`/`inject`/`apply`）、
   `apply()` 在有无服务时的行为、slot 注册目标、样式挂载、`theme/change` 订阅、组件渲染。
   **改完 `client.js` 先跑它**，因为客户端 bundle 一旦在最顶层抛错会牵连 Web 端模块系统。
 - **`livetest.mjs`**：需要 `react`/`react-dom`/`jsdom`（**故意不进 package.json 依赖**，
-  避免让插件包带上开发期重量）。它用**真 React**把玻璃层真的挂进真 DOM，并验证
+  避免让插件包带上开发期重量）。它用**真 React** 把玻璃层真的挂进真 DOM，并验证
+  几何锚定（含"包含块非视口"时的差值归零）、fail-closed 行为、
   `running` 状态翻转时 `data-busy` / `data-on` 跟着变、卸载后 DOM 清干净。
 
 > 两个测试装置上的坑（都写进注释了）：
@@ -95,12 +101,20 @@ node livetest.mjs <react-umd 目录>      # 20 项：真 React + 真 DOM，验�
 - **主题**：直接消费 DSH 的 `--dsw-*` token 与 `body[data-ds-dark-theme]`，
   **不自己管理主题状态**；过渡窗口通过监听 `ctx.theme` 的 `theme/change` 事件实现。
 - **挂点**：`conversation.input.overlay`（list，session 作用域）；
-  "模型是否在思考"来自标准 props 的 `useSession((s) => s.running)`。
+  "模型是否在思考"来自标准 props 的 `useSession((s) => s.running)`，
+  取不到时退化为观察原生按钮的「发送 ↔ 停止」态（MutationObserver），保证气泡不会静默失效。
+- **几何**：玻璃层用 `position:fixed` + 实测原生卡片矩形写进 CSS 变量。
+  ⚠ 取的是「卡片矩形 − 自身矩形」的**差值**，不能直接用卡片的视口坐标——
+  卡片一旦带 `backdrop-filter` 就会成为 fixed 的包含块，直接写会偏移叠加两次。
+  找不到卡片则整体隐藏（fail-closed）。
 - **踩过的坑**（都写进注释了）：
-  - `mask-composite` 必须 `-webkit-` 前缀 + 标准属性**双写**，否则镶边会糊成实心块。
+  - **已删除的「镶边」**：曾用"放大盒子 + `mask-composite` 只留边线"做 1.5px 绕行亮边，
+    深色下会变成**一圈巨大的旋转发光矩形**（用户点名要求删掉）。教训：`mask-composite`
+    必须 `-webkit-` 前缀与标准属性**双写**，且**绝不要放大盒子**；要做镶边应让盒子就是玻璃本身。
   - 玻璃里的彩色无论多淡都会显土；低饱和色块压在深底上还会变泥浆色。
   - 循环动画必须让元素在关键帧里**自己收束**——曾做成"无限上浮"，到顶被裁掉，看不出破灭。
   - 给会动的元素做 `scaleY` 调幅度时**必须显式写 `transform-origin`**，否则元素会"消失"。
+  - 读 `getComputedStyle` / 条件调用 hook 都会在真实环境里炸；前者要 try/catch，后者要定序。
 - **参考**：
   [wxperia/liquid-glass-vue](https://github.com/wxperia/liquid-glass-vue) 与
   [rdev/liquid-glass-react](https://github.com/rdev/liquid-glass-react)（折射位移图的算法来源），
