@@ -4,3 +4,11 @@ node_modules/
 
 .commit-msg.txt
 *.tmp-*
+
+# 我写提交信息时用的临时文件（曾两次误提交，这里彻底堵住）
+.msg-*.txt
+.issue-*.md
+.badge-msg.txt
+.rename-msg.txt
+.doc-msg.txt
+.api-msg.txt
